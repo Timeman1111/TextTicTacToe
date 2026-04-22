@@ -52,3 +52,32 @@ class HorizontalLine(Renderable):
         return move_str +  "".join(ls)
 
 
+class XCell(Renderable):
+    def __init__(self, x: int, y: int, size: int, color: tuple[int, int, int] = (255, 255, 255)):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.size = size
+
+
+    def render(self) -> str:
+        return self.__generate_x()
+
+    def __generate_x(self):
+
+        ls = []
+
+        for i in range(self.size):
+            up_px = generate_move_string((self.x + i, self.y + i)) + generate_pixel(color=self.color)
+            down_pixel = generate_move_string((self.x + i, self.y + self.size - i - 1)) + generate_pixel(color=self.color)
+            ls.append(up_px)
+            ls.append(down_pixel)
+
+
+
+        return "".join(ls)
+
+
+
+
+

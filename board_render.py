@@ -18,10 +18,12 @@ class BoardRenderer:
         self.vertical_extra = round(self.square_size / 2)
 
     def render_board(self, x: int, y: int, board: TicTacToe):
+
         boarders: list[Renderable] = self.generate_borders(x=x, y=y, board_size=len(board.board))
 
-
         self.out(boarders)
+
+
 
     def out(self, renderables: list[Renderable]):
         for renderable in renderables:
