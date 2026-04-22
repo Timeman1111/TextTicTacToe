@@ -36,6 +36,9 @@ class ToeGame:
 
         x, y = self.get_player_input()
 
+        if self.board.is_occupied(x, y):
+            print("That spot is already taken")
+            return self.player_turn(player_id)
 
 
         self.board.play(player_id, x, y)

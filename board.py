@@ -101,6 +101,9 @@ class TicTacToe:
         if self.debug:
             print(msg, end=end)
 
+    def is_occupied(self, x: int, y: int) -> bool:
+        return self.board[y][x] != 0
+
 
     @property
     def all_full(self) -> bool:
