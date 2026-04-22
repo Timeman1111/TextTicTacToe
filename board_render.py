@@ -35,6 +35,7 @@ class BoardRenderer:
         self.out(squares)
         self.out(boarders)
 
+    def move_to_bottom(self):
         move_to_bottom()
 
     def generate_board_squares(self, x: int, y: int, board: TicTacToe):
