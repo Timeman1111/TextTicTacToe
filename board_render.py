@@ -20,6 +20,7 @@ class BoardRenderer:
     def render_board(self, x: int, y: int, board: TicTacToe):
         boarders: list[Renderable] = self.generate_borders(x=x, y=y, board_size=len(board.board))
 
+
         self.out(boarders)
 
     def out(self, renderables: list[Renderable]):
@@ -32,14 +33,14 @@ class BoardRenderer:
 
     def generate_borders(self, x: int, y: int, board_size: int = 3):
         boarders: list[Renderable] = []
-        start_y = y - (self.square_size * self.scale)
+
 
         lines_c = board_size + 1
 
         length = (self.square_size * board_size)
-        vert_lines = self.__generate_vertical_lines(x=x, y=start_y, length=length,spacing=self.square_size, line_count=lines_c)
+        vert_lines = self.__generate_vertical_lines(x=x, y=y, length=length,spacing=self.square_size, line_count=lines_c)
 
-        hor_lines = self.__generate_horizontal_lines(x=x, y=start_y, length=length,spacing=self.square_size, line_count=lines_c)
+        hor_lines = self.__generate_horizontal_lines(x=x, y=y, length=length,spacing=self.square_size, line_count=lines_c)
 
         boarders.extend(vert_lines)
         boarders.extend(hor_lines)
@@ -50,16 +51,16 @@ class BoardRenderer:
         return boarders
 
 
-    def __generate_vertical_lines(self, x: int, y: int, length: int, spacing: int, line_count: int = 4):
-        lines = []
+    def __generate_vertical_lines(self, x: int, y: int, length: int, spacing: int, line_count: int = 4) -> list[VerticalLine]:
+        lines: list[VerticalLine] = []
         for x_step in range(line_count):
             vz = VerticalLine(x=(x + (x_step * spacing) * self.scale), y=y, length=length * self.scale, color=self.border_color)
             lines.append(vz)
 
         return lines
 
-    def __generate_horizontal_lines(self, x: int, y: int, spacing: int, length: int, line_count: int = 4):
-        lines = []
+    def __generate_horizontal_lines(self, x: int, y: int, spacing: int, length: int, line_count: int = 4) -> list[HorizontalLine]:
+        lines: list[HorizontalLine] = []
         for y_step in range(line_count):
             hz = HorizontalLine(x=x, y=y + ((y_step * spacing) * self.scale), length=length * self.scale, color=self.border_color)
             lines.append(hz)

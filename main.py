@@ -9,20 +9,18 @@ import os
 
 
 def clear():
-    print("\033[2J", end="\033[0;0H")
+    print("\033[2J", end="")
 
 
 if __name__ == '__main__':
     clear()
     term_size = os.get_terminal_size()
-    scale = 1
+
     lines, columns = term_size.lines, term_size.columns
 
-    x = columns // 2 - 1
-    y = lines // 2 - 1
+    x, y = 0,0
+    scale = 1
 
-
-    clear()
     b = TicTacToe(True)
     render = BoardRenderer(scale = scale)
 

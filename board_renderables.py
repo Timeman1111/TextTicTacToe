@@ -5,10 +5,9 @@ def generate_move_string(move: tuple[int, int]):
 def generate_color_string(color: tuple[int, int, int]):
     return f"\033[38;2;{color[0]};{color[1]};{color[2]}m"
 
-def generate_pixel(x: int, y: int, color: tuple[int, int, int] = (255, 255, 255)):
+def generate_pixel(color: tuple[int, int, int] = (255, 255, 255)):
     color_str = generate_color_string(color)
-    move_str = f"\033[{y};{x}H"
-    return f"{move_str}{color_str}█\033[0m"
+    return f"{color_str}█\033[0m"
 
 class Renderable:
     def render(self) -> str:
@@ -27,7 +26,8 @@ class VerticalLine(Renderable):
 
     def __generate_vertical_line(self):
 
-        ls: list[str] = [generate_pixel(x=self.x, y=self.y + i, color=self.color) for i in range(self.length)]
+
+        ls: list[str] = [generate_move_string((self.x, self.y + i)) + generate_pixel(color=self.color) for i in range(self.length)]
         return "".join(ls)
 
 
@@ -46,8 +46,9 @@ class HorizontalLine(Renderable):
 
 
     def __generate_horizontal_line(self) -> str:
+        move_str = generate_move_string((self.x, self.y))
 
-        ls: list[str] = [generate_pixel(x=self.x + i, y=self.y, color=self.color) for i in range(self.length)]
-        return "".join(ls)
+        ls: list[str] = [generate_pixel(color=self.color) for i in range(self.length)]
+        return move_str +  "".join(ls)
 
 
