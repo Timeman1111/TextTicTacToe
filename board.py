@@ -38,7 +38,6 @@ class TicTacToe:
         self.board[y][x] = player_id
 
     def who_won(self) -> list:
-        # Optimized to scan board once
         winners = []
         size = len(self.board)
         

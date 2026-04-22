@@ -15,7 +15,7 @@ def clear():
 if __name__ == '__main__':
     clear()
     term_size = os.get_terminal_size()
-    scale = 3
+    scale = 1
     lines, columns = term_size.lines, term_size.columns
 
     x = columns // 2 - 1
