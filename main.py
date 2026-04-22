@@ -43,8 +43,7 @@ class ToeGame:
 
     def get_player_input(self):
 
-
-
+        mx = len(self.board.board)
         def get_int(prompt: str):
             while True:
                 try:
@@ -52,11 +51,17 @@ class ToeGame:
                 except ValueError:
                     print("Invalid input. Please enter a valid integer.")
 
-        mx = len(self.board.board)
-        x: int = get_int(f"Enter Column (1 - {mx}): ") - 1
-        y: int = get_int(f"Enter Height (1 - {mx}): ") - 1
+        def is_within(value: int,  mx: int, mn: int):
+            return mn <= value <= mx
 
-        return x, y
+        x: int = get_int(f"Enter Column (1 - {mx}): ")
+        y: int = get_int(f"Enter Height (1 - {mx}): ")
+
+        if not is_within(x, mx, 1) or not is_within(y, mx, 1):
+            print("Invalid input. Please enter a value between 1 and 3.")
+            return self.get_player_input()
+
+        return x - 1, y - 1
 
     def round(self, player_id: int):
         clear()
@@ -64,7 +69,6 @@ class ToeGame:
         self.player_turn(player_id=player_id)
 
         if self.board.did_win(player_id):
-            print(f"Player {player_id} won!")
             return True
 
 
@@ -83,6 +87,22 @@ class ToeGame:
             if p2:
                 break
 
+
+            if self.board.all_full:
+                break
+
+        clear()
+        self.show_board()
+        print(f"\n\nGame Over!")
+
+        if self.board.is_draw:
+            print("It's a draw!")
+
+        else:
+
+            players = self.board.who_won()
+
+            print(f"{self.board.players[players[0]]} won!")
 
 
 
