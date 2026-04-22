@@ -13,6 +13,8 @@ class ToeGame:
         self.board = TicTacToe()
         self.renderer = BoardRenderer(scale=self.scale)
 
+        self.running = False
+
     def __add_players(self):
 
         self.board.add_player(1, 'Player 1')
@@ -61,13 +63,25 @@ class ToeGame:
         self.show_board()
         self.player_turn(player_id=player_id)
 
+        if self.board.did_win(player_id):
+            print(f"Player {player_id} won!")
+            return True
 
 
     def play(self):
         self.__add_players()
-        while True:
-            self.round(player_id=1)
-            self.round(player_id=2)
+        self.running = True
+        while self.running:
+            p1 = self.round(player_id=1)
+
+            if p1:
+                break
+
+
+            p2 = self.round(player_id=2)
+
+            if p2:
+                break
 
 
 

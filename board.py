@@ -96,3 +96,23 @@ class TicTacToe:
     def log(self, msg:str, end: str = "\n"):
         if self.debug:
             print(msg, end=end)
+
+
+    @property
+    def all_full(self) -> bool:
+
+        for y in range(len(self.board)):
+            for x in range(len(self.board[y])):
+                if self.board[y][x] == 0:
+                    return False
+        return True
+
+    @property
+    def is_draw(self) -> bool:
+
+        if self.all_full:
+            if len(self.who_won()) > 0:
+                return False
+            return True
+
+        return False
