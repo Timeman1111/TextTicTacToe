@@ -18,35 +18,62 @@ class ToeGame:
         self.board.add_player(1, 'Player 1')
         self.board.add_player(2, 'Player 2')
 
+    def player_turn(self, player_id: int):
+
+
+
+        if player_id not in self.board.players:
+            print(f"Player with id {player_id} not in registry")
+            return
+
+        name = self.board.players[player_id]
+
+
+        print(f"\n\n{name}'s Turn", end="\n")
+
+
+        x, y = self.get_player_input()
+
+
+
+        self.board.play(player_id, x, y)
+
+
+    def get_player_input(self):
+
+
+
+        def get_int(prompt: str):
+            while True:
+                try:
+                    return int(input(prompt))
+                except ValueError:
+                    print("Invalid input. Please enter a valid integer.")
+
+        mx = len(self.board.board)
+        x: int = get_int(f"Enter Column (1 - {mx}): ") - 1
+        y: int = get_int(f"Enter Height (1 - {mx}): ") - 1
+
+        return x, y
+
+    def round(self, player_id: int):
+        clear()
+        self.show_board()
+        self.player_turn(player_id=player_id)
+
+
+
     def play(self):
         self.__add_players()
         while True:
-            clear()
-            self.renderer.render_board(x=self.x, y=self.y, board=self.board)
-
-            print("\nPlayer 1 Turn", end="\n")
-            X = input("X: ")
-
-            try:
-                x = int(X)
-
-
-            except ValueError:
-                print(f"Invalid X: {X}")
-                continue
+            self.round(player_id=1)
+            self.round(player_id=2)
 
 
 
-            Y = input("Y: ")
 
-            try:
-                y = int(Y)
-
-            except ValueError:
-                print(f"Invalid Y: {Y}")
-                continue
-
-            self.board.play(1, int(x), int(Y))
+    def show_board(self):
+        self.renderer.render_board(x=self.x, y=self.y, board=self.board)
 
 
 
