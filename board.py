@@ -1,11 +1,10 @@
 
 
 class TicTacToe:
-    def __init__(self, debug: bool = False):
+    def __init__(self, board_size: int = 3, debug: bool = False):
         self.players: dict[int, str] = {}
-        self.board = [[0,0,0],
-                      [0,0,0],
-                      [0,0,0]]
+        self.size = board_size
+        self.board = self.create_board(self.size)
 
         self.debug = debug
 
@@ -21,8 +20,14 @@ class TicTacToe:
         else:
             print("Player not in registry")
 
+    def create_board(self, size: int):
+        """ Creates a list of zeros of size x size"""
+        return [self.__create_zero_list(size) for _ in range(size)]
 
+    def __create_zero_list(self, length: int):
 
+        row = [0] * length
+        return row
 
 
     def play(self, player_id, x: int, y: int):
@@ -37,16 +42,15 @@ class TicTacToe:
 
         self.board[y][x] = player_id
 
-    def who_won(self) -> list:
+    def who_won(self) -> list[int]:
+        """Returns a list of player ids of players who won with current game state"""
         winners = []
         size = len(self.board)
-        
         # Check rows
         for row in self.board:
             first = row[0]
             if first != 0 and all(cell == first for cell in row):
                 if first not in winners: winners.append(first)
-                
         # Check columns
         for x in range(size):
             first = self.board[0][x]

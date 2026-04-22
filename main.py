@@ -5,12 +5,12 @@ import os
 
 
 class ToeGame:
-    def __init__(self, tx: int = 1, ty: int = 1, t_scale: int = 1):
+    def __init__(self, size: int = 3, tx: int = 1, ty: int = 1, t_scale: int = 1):
 
         self.x = tx
         self.y = ty
         self.scale = t_scale
-        self.board = TicTacToe()
+        self.board = TicTacToe(size)
         self.renderer = BoardRenderer(scale=self.scale)
 
         self.running = False
@@ -43,7 +43,7 @@ class ToeGame:
 
     def get_player_input(self):
 
-        mx = len(self.board.board)
+        mx = self.board.size
         def get_int(prompt: str):
             while True:
                 try:
@@ -68,8 +68,10 @@ class ToeGame:
         self.show_board()
         self.player_turn(player_id=player_id)
 
-        if self.board.did_win(player_id):
+        if self.board.did_win(player_id) or self.board.is_draw:
             return True
+
+
 
 
     def play(self):
