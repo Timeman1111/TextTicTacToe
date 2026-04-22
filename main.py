@@ -18,8 +18,8 @@ if __name__ == '__main__':
 
     lines, columns = term_size.lines, term_size.columns
 
-    x, y = 0,0
-    scale = 3
+    x, y = 2,2
+    scale = 1
 
     b = TicTacToe(True)
     render = BoardRenderer(scale = scale)

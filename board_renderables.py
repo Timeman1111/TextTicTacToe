@@ -67,9 +67,9 @@ class XCell(Renderable):
 
         ls = []
 
-        for i in range(self.size):
+        for i in range(1, self.size):
             up_px = generate_move_string((self.x + i, self.y + i)) + generate_pixel(color=self.color)
-            down_pixel = generate_move_string((self.x + i, self.y + self.size - i - 1)) + generate_pixel(color=self.color)
+            down_pixel = generate_move_string((self.x + i, self.y + self.size - i)) + generate_pixel(color=self.color)
             ls.append(up_px)
             ls.append(down_pixel)
 

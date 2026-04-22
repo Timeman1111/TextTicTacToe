@@ -1,5 +1,11 @@
 from board import TicTacToe
 from board_renderables import *
+import os
+
+def move_to_bottom():
+    lines, columns = os.get_terminal_size()
+    move_str = generate_move_string((0, lines - 1))
+    print(move_str, end="")
 
 def clamp(min_val, value: float | int):
     return max(min_val, value)
@@ -14,24 +20,47 @@ class BoardRenderer:
         self.background_color = (255, 255, 255)
         self.border_color = (255, 255, 255)
 
-        self.square_size = 10
+        self.square_size = 11
         self.vertical_extra = round(self.square_size / 2)
+
+        self.x_color = (255, 0, 0)
+        self.y_color = (0, 255, 0)
 
     def render_board(self, x: int, y: int, board: TicTacToe):
 
         boarders: list[Renderable] = self.generate_borders(x=x, y=y, board_size=len(board.board))
 
+        squares: list[Renderable] = self.generate_board_squares(x=x, y=y, board=board)
+
+        self.out(squares)
         self.out(boarders)
 
+        move_to_bottom()
+
+    def generate_board_squares(self, x: int, y: int, board: TicTacToe):
+        square_size = self.square_size * self.scale
+
+        squares: list[Renderable] = []
+
+        for by in range(len(board.board)):
+            for bx in range(len(board.board[y])):
+                cell_value = board.board[by][bx]
+
+                if cell_value == 0:
+                    continue
+
+                if cell_value == 1:
+                    cell_x = (bx * square_size) + x
+                    cell_y = (by * square_size) + y
+                    xcell = XCell(x=cell_x, y=cell_y, size = square_size, color=self.x_color)
+                    squares.append(xcell)
+
+        return squares
 
 
     def out(self, renderables: list[Renderable]):
         for renderable in renderables:
             print(renderable.render(), end="")
-
-
-        print("")
-
 
     def generate_borders(self, x: int, y: int, board_size: int = 3):
         boarders: list[Renderable] = []
