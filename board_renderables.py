@@ -1,3 +1,5 @@
+import math
+
 
 def generate_move_string(move: tuple[int, int]):
     return f"\033[{move[1]};{move[0]}H"
@@ -77,7 +79,39 @@ class XCell(Renderable):
 
         return "".join(ls)
 
+class OCell(Renderable):
+
+    def __init__(self, x: int, y: int, size: int, color: tuple[int, int, int] = (255, 255, 255)):
+        self.x =x
+        self.y = y
+        self.size = size
+        self.color = color
+
+    def render(self) -> str:
+        return self.__generate_o()
+
+    def __generate_o(self):
 
 
+        radius = (self.size - 2) /2
+
+        center_x = self.x + (self.size / 2)
+        center_y = self.y + (self.size / 2)
+
+        ls = []
+        for i in range(self.size):
+            for j in range(self.size):
+
+                curr_x  =self.x + i
+
+                curr_y = self.y + j
+
+
+                dst = math.sqrt((curr_x - center_x) ** 2 + (curr_y - center_y) ** 2)
+                if abs(dst - radius) < 0.5:
+                    ls.append(generate_move_string((curr_x, curr_y)) + generate_pixel(color=self.color))
+
+
+        return "".join(ls)
 
 

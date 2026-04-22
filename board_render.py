@@ -55,6 +55,12 @@ class BoardRenderer:
                     xcell = XCell(x=cell_x, y=cell_y, size = square_size, color=self.x_color)
                     squares.append(xcell)
 
+                elif cell_value == 2:
+                    cell_x = (bx * square_size) + x
+                    cell_y = (by * square_size) + y
+                    ocell = OCell(x=cell_x, y=cell_y, size = square_size, color=self.y_color)
+                    squares.append(ocell)
+
         return squares
 
 

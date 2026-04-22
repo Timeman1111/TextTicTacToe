@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
 
     b.play(1, x=0, y=0)
-    b.play(1, x=1, y=1)
+    b.play(2, x=1, y=1)
     b.play(1, x=2, y=2)
     render.render_board(board=b, x=x, y=y)
 
