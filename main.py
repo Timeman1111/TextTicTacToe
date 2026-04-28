@@ -46,7 +46,7 @@ class ToeGame:
 
     def get_player_input(self):
 
-        mx = self.board.size
+
         def get_int(prompt: str):
             while True:
                 try:
@@ -57,12 +57,12 @@ class ToeGame:
         def is_within(value: int,  mx: int, mn: int):
             return mn <= value <= mx
 
-        x: int = get_int(f"Enter Column (1 - {mx}): ")
-        y: int = get_int(f"Enter Height (1 - {mx}): ")
+        x: int = get_int(f"Enter Column (1 - {self.board.size}): ")
+        y: int = get_int(f"Enter Height (1 - {self.board.size}): ")
 
-        if not is_within(x, mx, 1) or not is_within(y, mx, 1):
-            print("Invalid input. Please enter a value between 1 and 3.")
-            return self.get_player_input()
+        if not is_within(x, self.board.size, 1) or not is_within(y, self.board.size, 1):
+            print(f"Invalid input. Please enter a value between 1 and {self.board.size}.")
+            return self.get_player_input() # Could cause a recursion error if player keeps entering in invalid input
 
         return x - 1, y - 1
 
