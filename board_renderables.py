@@ -4,6 +4,8 @@ import math
 def generate_move_string(move: tuple[int, int]):
     return f"\033[{move[1]};{move[0]}H"
 
+
+
 def generate_color_string(color: tuple[int, int, int]):
     return f"\033[38;2;{color[0]};{color[1]};{color[2]}m"
 
@@ -31,6 +33,8 @@ class VerticalLine(Renderable):
 
         ls: list[str] = [generate_move_string((self.x, self.y + i)) + generate_pixel(color=self.color) for i in range(self.length)]
         return "".join(ls)
+
+
 
 
 class HorizontalLine(Renderable):

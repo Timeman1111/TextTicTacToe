@@ -41,7 +41,7 @@ class ToeGame:
             return self.player_turn(player_id)
 
 
-        self.board.play(player_id, x, y)
+        return self.board.play(player_id, x, y)
 
 
     def get_player_input(self):
@@ -66,7 +66,7 @@ class ToeGame:
 
         return x - 1, y - 1
 
-    def round(self, player_id: int):
+    def round(self, player_id: int) -> bool | None:
         clear()
         self.show_board()
         self.player_turn(player_id=player_id)
