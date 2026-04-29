@@ -119,8 +119,19 @@ class ToeGame:
 def clear():
     print("\033[2J", end="")
 
-
-if __name__ == '__main__':
+def run_game():
     clear()
     game = ToeGame()
     game.play()
+
+if __name__ == '__main__':
+
+    while True:
+        run_game()
+        print("Press Enter to play again or Ctrl+C to exit.")
+        try:
+            input()
+        except KeyboardInterrupt:
+            print("Exiting...")
+
+            break
