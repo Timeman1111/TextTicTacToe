@@ -3,50 +3,15 @@ import time
 import random
 import sys
 from frame import Frame
-
-def clear():
-    print("\033[2J", end="")
-
-def hide_cursor():
-    print("\033[?25l", end="")
-
-def show_cursor():
-    print("\033[?25h", end="")
-
-def generate_move_string(x: int, y: int):
-    return f"\033[{y + 1};{x + 1}H"
-
-def generate_fore_color(color: tuple[int, int, int]):
-    return f"\033[38;2;{color[0]};{color[1]};{color[2]}m"
-
-def generate_back_color(color: tuple[int, int, int]):
-    return f"\033[48;2;{color[0]};{color[1]};{color[2]}m"
-
-def calculate_slope(x1: int, y1: int, x2: int, y2: int):
-    if x1 == x2:
-        return float("inf")
-    return (y2 - y1) / (x2 - x1)
-
-TOP_HALF_BLOCK = "▀"
-
-
-
-def build_pixel(top_color: tuple[int, int, int] = (0, 0, 0), bottom_color: tuple[int, int, int] = (0, 0, 0)):
-    tp = generate_fore_color(top_color)
-    bt = generate_back_color(bottom_color)
-
-    px = tp + bt + TOP_HALF_BLOCK + "\033[0m"
-    return px
-
+from term_utils import *
 
 class Screen:
     def __init__(self, last_pos: tuple[int, int] = (0, 0)):
         self.last_pos = last_pos
+        self.p1: Frame = Frame()
         self.f1: Frame = Frame()
 
-        self.buffer = []
-
-        self.height, self.width = os.get_terminal_size()
+        self.width, self.height = os.get_terminal_size()
 
         self.is_cursor_visible = True
 
@@ -74,34 +39,10 @@ class Screen:
     def get(self, key: tuple[int, int], default: tuple[int, int, int] = (0, 0, 0)):
         return self.f1.get(key, default)
 
-
-
-
-
+    # noinspection PyShadowingNames
     def __setitem__(self, key: tuple[int, int], value: tuple[int, int, int]):
-        x, y = key
-
-
-
         self.f1[key] = value
 
-        vy = y // 2 # Divide by 2 to get the vertical position of the pixel
-
-
-        if y % 2 == 0:
-            btm = self.get((x, y + 1), (0, 0, 0))
-            px = build_pixel(bottom_color=btm, top_color=self.f1[key])
-
-        else:
-            top = self.get((x, y - 1), (0, 0, 0))
-            px = build_pixel(top, bottom_color=self.f1[key])
-
-        self.move_cursor(x, vy)
-
-        self._write_pixel_to_buffer(px)
-
-    def _write_pixel_to_buffer(self, px: str):
-        self.buffer.append(px)
 
 
 
@@ -109,32 +50,50 @@ class Screen:
         sys.stdout.write(text + end)
 
     def refresh(self):
-
         self.hide_cursor()
-        self.__out("".join(self.buffer))
-        self.buffer.clear()
+        self.home_cursor()
 
-        if not self.is_cursor_visible:
+        output = []
+        for vy in range(self.height):
+            for x in range(self.width):
+                top_color = self.f1.get((x, vy * 2), (0, 0, 0))
+                bottom_color = self.f1.get((x, vy * 2 + 1), (0, 0, 0))
+                output.append(build_pixel(top_color, bottom_color))
+            output.append("\n")
+
+        self.__out("".join(output), end="")
+
+        self.p1 = self.f1
+        self.f1 = Frame()
+
+        self.move_to_bottom()
+
+        if self.is_cursor_visible:
             self.show_cursor()
 
     def move_to_bottom(self):
-        move_str = generate_move_string(0, self.height - 2)
+        move_str = generate_move_string(0, self.height - 1)
         self.__out(move_str, end="")
 
 
     def draw_line(self, x: int, y: int, x2: int, y2: int, color: tuple[int, int, int]):
+        dx = abs(x2 - x)
+        dy = abs(y2 - y)
+        sx = 1 if x < x2 else -1
+        sy = 1 if y < y2 else -1
+        err = dx - dy
 
-        slope = calculate_slope(x, y, x2, y2) # Use function to calculate slope, should be able to handle divison by zero
-
-
-        y_intercept = y - (slope * x)
-
-        n = abs(x - (x2 + 1)) # +1 to include the x2 coordinate block as well
-
-        for i in range(n):
-            t_x: int = (x + i)
-            t_y = round((slope * t_x) + y_intercept)
-            self[(t_x, t_y)] = color
+        while True:
+            self[(x, y)] = color
+            if x == x2 and y == y2:
+                break
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x += sx
+            if e2 < dx:
+                err += dx
+                y += sy
 
 
 
@@ -149,14 +108,24 @@ if __name__ == "__main__":
     c = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 123, 0)]
     screen = Screen()
 
-
+    frame_durations = []
     for i in range(100):
+        st = time.perf_counter()
         for x in range(screen.width):
-            for y in range(screen.height):
+            for y in range(screen.height * 2):
                 screen[(x, y)] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
 
         screen.refresh()
 
+        et = time.perf_counter()
+
+        frame_durations.append(et - st)
+
+
+    avg_frame_duration = sum(frame_durations) / len(frame_durations)
+
+
 
     screen.move_to_bottom()
+    print(f"Time taken: {avg_frame_duration} seconds\n\nFPS: {1 / avg_frame_duration}")
