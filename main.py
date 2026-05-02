@@ -39,9 +39,8 @@ class ToeGame:
         if self.board.is_occupied(x, y):
             print("That spot is already taken")
             return self.player_turn(player_id)
-
-
-        self.board.play(player_id, x, y)
+        else:
+            self.board.play(player_id, x, y)
 
 
     def get_player_input(self):
@@ -122,5 +121,16 @@ def clear():
 
 if __name__ == '__main__':
     clear()
-    game = ToeGame()
+
+    size = os.get_terminal_size()
+
+
+
+
+    square_amount = int(input("\nEnter board size: "))
+    game = ToeGame(size=square_amount, tx = 20)
+
+    length = (game.renderer.square_size * game.board.size) // 2
+    term_width = size.columns / 2
+    game.x = int(term_width - length)
     game.play()
