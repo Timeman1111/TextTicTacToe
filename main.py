@@ -39,13 +39,14 @@ class ToeGame:
         if self.board.is_occupied(x, y):
             print("That spot is already taken")
             return self.player_turn(player_id)
-        else:
-            self.board.play(player_id, x, y)
+
+
+        return self.board.play(player_id, x, y)
 
 
     def get_player_input(self):
 
-        mx = self.board.size
+
         def get_int(prompt: str):
             while True:
                 try:
@@ -56,16 +57,16 @@ class ToeGame:
         def is_within(value: int,  mx: int, mn: int):
             return mn <= value <= mx
 
-        x: int = get_int(f"Enter Column (1 - {mx}): ")
-        y: int = get_int(f"Enter Height (1 - {mx}): ")
+        x: int = get_int(f"Enter Column (1 - {self.board.size}): ")
+        y: int = get_int(f"Enter Height (1 - {self.board.size}): ")
 
-        if not is_within(x, mx, 1) or not is_within(y, mx, 1):
-            print("Invalid input. Please enter a value between 1 and 3.")
-            return self.get_player_input()
+        if not is_within(x, self.board.size, 1) or not is_within(y, self.board.size, 1):
+            print(f"Invalid input. Please enter a value between 1 and {self.board.size}.")
+            return self.get_player_input() # Could cause a recursion error if player keeps entering in invalid input
 
         return x - 1, y - 1
 
-    def round(self, player_id: int):
+    def round(self, player_id: int) -> bool | None:
         clear()
         self.show_board()
         self.player_turn(player_id=player_id)
@@ -118,19 +119,19 @@ class ToeGame:
 def clear():
     print("\033[2J", end="")
 
+def run_game():
+    clear()
+    game = ToeGame()
+    game.play()
 
 if __name__ == '__main__':
-    clear()
 
-    size = os.get_terminal_size()
+    while True:
+        run_game()
+        print("Press Enter to play again or Ctrl+C to exit.")
+        try:
+            input()
+        except KeyboardInterrupt:
+            print("Exiting...")
 
-
-
-
-    square_amount = int(input("\nEnter board size: "))
-    game = ToeGame(size=square_amount, tx = 20)
-
-    length = (game.renderer.square_size * game.board.size) // 2
-    term_width = size.columns / 2
-    game.x = int(term_width - length)
-    game.play()
+            break
