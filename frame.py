@@ -1,4 +1,4 @@
-from term_utils import *
+"""Frame: pixel buffer for terminal rendering, supporting flat and sparse storage."""
 
 
 class Frame:
@@ -7,6 +7,7 @@ class Frame:
     Can be stored as a flat list for efficiency if dimensions are known,
     or as a dictionary for sparse storage.
     """
+
     def __init__(self, width: int = 0, height: int = 0):
         """
         Initializes a Frame.
@@ -105,7 +106,12 @@ class Frame:
         Each cell (x, vy) corresponds to two pixels.
         """
         changes = {}
-        if self.is_flat and other.is_flat and self.width == other.width and self.height == other.height:
+        if (
+            self.is_flat
+            and other.is_flat
+            and self.width == other.width
+            and self.height == other.height
+        ):
             # Optimize for terminal cell comparison (2 pixels at a time)
             self_pixels = self.pixels
             other_pixels = other.pixels
@@ -116,12 +122,10 @@ class Frame:
                 for x in range(width):
                     idx1 = base_idx + x
                     idx2 = idx1 + idx2_offset
-                    
-                    if (self_pixels[idx1] != other_pixels[idx1] or 
-                        self_pixels[idx2] != other_pixels[idx2]):
+
+                    if (
+                        self_pixels[idx1] != other_pixels[idx1]
+                        or self_pixels[idx2] != other_pixels[idx2]
+                    ):
                         changes[(x, vy)] = (self_pixels[idx1], self_pixels[idx2])
         return changes
-
-
-
-

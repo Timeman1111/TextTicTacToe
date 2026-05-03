@@ -1,17 +1,28 @@
+"""Screen: terminal display manager with frame buffering and pixel-level rendering."""
 import os
-import time
 import random
 import sys
-import numpy as np
 from collections import deque
 
-from frame import Frame
-from term_utils import *
+import numpy as np
 import cv2
+
+from frame import Frame
+from term_utils import (
+    init_terminal,
+    clear,
+    hide_cursor,
+    show_cursor,
+    generate_move_string,
+    build_pixel,
+)
+
+
 class Screen:
     """
     Manages the terminal display, including cursor control and frame refreshing.
     """
+
     def __init__(self, last_pos: tuple[int, int] = (0, 0)):
         """
         Initializes the Screen.
@@ -20,7 +31,7 @@ class Screen:
         init_terminal()
         self.last_pos = last_pos
         self.width, self.height = os.get_terminal_size()
-        
+
         self.p1: Frame = Frame(self.width, self.height * 2)
         self.f1: Frame = Frame(self.width, self.height * 2)
 
@@ -97,18 +108,25 @@ class Screen:
         and outputting only the changes, or a full refresh if too many changes occur.
         """
         self.hide_cursor()
-        
+
         changes = self.f1.compare(self.p1)
-        
+
         if len(changes) > (self.width * self.height) // 2:
             # Full refresh
             self.home_cursor()
-            output = [build_pixel(self.f1.pixels[vy*2*self.width + x], 
-                                  self.f1.pixels[(vy*2+1)*self.width + x]) 
-                      if x < self.width - 1 else 
-                      build_pixel(self.f1.pixels[vy*2*self.width + x], 
-                                  self.f1.pixels[(vy*2+1)*self.width + x]) + "\n"
-                      for vy in range(self.height) for x in range(self.width)]
+            output = [
+                build_pixel(
+                    self.f1.pixels[vy * 2 * self.width + x],
+                    self.f1.pixels[(vy * 2 + 1) * self.width + x],
+                )
+                if x < self.width - 1
+                else build_pixel(
+                    self.f1.pixels[vy * 2 * self.width + x],
+                    self.f1.pixels[(vy * 2 + 1) * self.width + x],
+                ) + "\n"
+                for vy in range(self.height)
+                for x in range(self.width)
+            ]
             self.__out("".join(output) + "\033[0m", end="")
         else:
             # Partial refresh
@@ -132,7 +150,14 @@ class Screen:
         move_str = generate_move_string(0, self.height - 1)
         self.__out(move_str, end="")
 
-    def draw_line(self, x: int, y: int, x2: int, y2: int, color: tuple[int, int, int]):
+    def draw_line(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self,
+        x: int,
+        y: int,
+        x2: int,
+        y2: int,
+        color: tuple[int, int, int],
+    ):
         """
         Draws a line on the current frame using Bresenham's line algorithm.
         :param x: Starting X-coordinate.
@@ -160,13 +185,19 @@ class Screen:
                 y += sy
 
 
-
-
 class Box:
     """
     A simple rectangular box that can move and bounce off the screen boundaries.
     """
-    def __init__(self, x: int, y: int, width: int, height: int, color: tuple[int, int, int]):
+
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        color: tuple[int, int, int],
+    ):
         """
         Initializes a Box.
         :param x: Initial X-coordinate.
@@ -197,14 +228,12 @@ class Box:
             for x in range(self.x, self.x + self.width):
                 t_screen[(x, y)] = self.color
 
-
     def update(self, width: int, height: int):
         """
         Updates the box position and handles bouncing off boundaries.
         :param width: The width of the boundary.
         :param height: The height of the boundary.
         """
-
 
         if self.x < 0 or self.x + self.width > width:
             self.x_vel = -self.x_vel
@@ -223,7 +252,15 @@ class ImageSurface:
     """
     A surface that can display an image from a numpy array.
     """
-    def __init__(self, x: int, y: int, width: int, height: int, image_array: np.ndarray):
+
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        image_array: np.ndarray,
+    ):
         """
         Initializes an ImageSurface.
         :param x: Initial X-coordinate.
@@ -252,9 +289,13 @@ class ImageSurface:
 
         # Pre-convert to a flat list of tuples for maximum drawing efficiency
         # This allows using list slicing during the draw call
-        self.pixels = [tuple(scaled_array[y, x]) for y in range(height) for x in range(width)]
+        self.pixels = [
+            tuple(scaled_array[py, px])
+            for py in range(height)
+            for px in range(width)
+        ]
 
-    def draw(self, t_screen: Screen):
+    def draw(self, t_screen: Screen):  # pylint: disable=too-many-locals
         """
         Draws the image on the provided screen as efficiently as possible.
         :param t_screen: The Screen object to draw on.
@@ -294,18 +335,20 @@ class ImageSurface:
             img_y = i - self.y
             img_offset = img_y * self.width + img_x_offset
 
-            target_pixels[target_offset : target_offset + copy_width] = \
-                self.pixels[img_offset : img_offset + copy_width]
-
+            target_pixels[target_offset: target_offset + copy_width] = \
+                self.pixels[img_offset: img_offset + copy_width]
 
     def move(self, x_pos: int, y_pos: int):
+        """Shift the surface's position by (x_pos, y_pos)."""
         self.x += x_pos
         self.y += y_pos
+
 
 class Video:
     """
     Manages a queue of image frames and renders them sequentially using ImageSurface.
     """
+
     def __init__(self, x: int, y: int, width: int, height: int):
         """
         Initializes the Video object.
@@ -355,22 +398,22 @@ class Video:
         """
         self.cursor = 0
 
+
 def load_img(img_path: str):
-    img_arr = cv2.imread(img_path)
-    img_rgb_arr = cv2.cvtColor(img_arr, cv2.COLOR_BGR2RGB)
+    """Load an image from disk and return it as an RGB numpy array."""
+    img_arr = cv2.imread(img_path)  # pylint: disable=no-member
+    img_rgb_arr = cv2.cvtColor(img_arr, cv2.COLOR_BGR2RGB)  # pylint: disable=no-member
     return img_rgb_arr
-
-
 
 
 if __name__ == "__main__":
     clear()
     screen = Screen()
-    img_arr = load_img("test_files/test.jpg")
+    loaded_img = load_img("test_files/test.jpg")
 
     IMG_SIZE = 25
 
-    image_surface = ImageSurface(0, 0, IMG_SIZE, IMG_SIZE, img_arr)
+    image_surface = ImageSurface(0, 0, IMG_SIZE, IMG_SIZE, loaded_img)
 
     try:
         while True:
@@ -388,10 +431,3 @@ if __name__ == "__main__":
                 image_surface.x += IMG_SIZE
     except KeyboardInterrupt:
         screen.move_to_bottom()
-
-
-
-
-
-
-
