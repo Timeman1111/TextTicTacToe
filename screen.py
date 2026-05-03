@@ -335,8 +335,9 @@ class ImageSurface:
             img_y = i - self.y
             img_offset = img_y * self.width + img_x_offset
 
-            target_pixels[target_offset: target_offset + copy_width] = \
+            target_pixels[target_offset: target_offset + copy_width] = (
                 self.pixels[img_offset: img_offset + copy_width]
+            )
 
     def move(self, x_pos: int, y_pos: int):
         """Shift the surface's position by (x_pos, y_pos)."""

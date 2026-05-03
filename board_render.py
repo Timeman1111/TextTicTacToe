@@ -8,13 +8,13 @@ from board_renderables import (
     Renderable,
     VerticalLine,
     XCell,
+    generate_move_string,
 )
 
 
 def move_to_bottom():
     """Move the terminal cursor to the last row."""
     lines, _ = os.get_terminal_size()
-    from board_renderables import generate_move_string  # pylint: disable=import-outside-toplevel
     move_str = generate_move_string((0, lines - 1))
     print(move_str, end="")
 
