@@ -1,20 +1,24 @@
+"""TicTacToe game logic: board state, player management, win/draw detection."""
 
 
 class TicTacToe:
+    """Represents a TicTacToe board and manages game state."""
+
     def __init__(self, board_size: int = 3, debug: bool = False):
+        """Initialize the board with a given size and optional debug mode."""
         self.players: dict[int, str] = {}
         self.size = board_size
         self.board = self.create_board(self.size)
 
         self.debug = debug
 
-
     def add_player(self, player_id: int, name: str):
-
+        """Register a player with the given id and display name."""
         self.players[player_id] = name
         return player_id
 
     def delete_player(self, player_id: int):
+        """Remove a player from the registry by id."""
         if player_id in self.players:
             del self.players[player_id]
         else:
@@ -25,12 +29,11 @@ class TicTacToe:
         return [self.__create_zero_list(size) for _ in range(size)]
 
     def __create_zero_list(self, length: int):
-
         row = [0] * length
         return row
 
-
     def play(self, player_id, x: int, y: int):
+        """Place player_id's mark at (x, y) if the cell is empty."""
         current_item = self.board[y][x]
 
         if current_item != 0:
@@ -50,25 +53,30 @@ class TicTacToe:
         for row in self.board:
             first = row[0]
             if first != 0 and all(cell == first for cell in row):
-                if first not in winners: winners.append(first)
+                if first not in winners:
+                    winners.append(first)
         # Check columns
         for x in range(size):
             first = self.board[0][x]
             if first != 0 and all(self.board[y][x] == first for y in range(size)):
-                if first not in winners: winners.append(first)
-                
+                if first not in winners:
+                    winners.append(first)
+
         # Check diagonals
         first_main = self.board[0][0]
         if first_main != 0 and all(self.board[i][i] == first_main for i in range(size)):
-            if first_main not in winners: winners.append(first_main)
-            
+            if first_main not in winners:
+                winners.append(first_main)
+
         first_anti = self.board[0][size - 1]
         if first_anti != 0 and all(self.board[i][size - 1 - i] == first_anti for i in range(size)):
-            if first_anti not in winners: winners.append(first_anti)
+            if first_anti not in winners:
+                winners.append(first_anti)
 
         return winners
 
     def did_win(self, player) -> bool:
+        """Return True if the given player has won."""
         size = len(self.board)
         # Check rows
         if any(all(cell == player for cell in row) for row in self.board):
@@ -84,39 +92,33 @@ class TicTacToe:
 
         return False
 
-
-
-
-
-
-
     def __repr__(self):
         return "\n".join(str(row) for row in self.board)
 
     def __str__(self):
         return self.__repr__()
 
-
-    def log(self, msg:str, end: str = "\n"):
+    def log(self, msg: str, end: str = "\n"):
+        """Print msg if debug mode is enabled."""
         if self.debug:
             print(msg, end=end)
 
     def is_occupied(self, x: int, y: int) -> bool:
+        """Return True if cell (x, y) is already claimed."""
         return self.board[y][x] != 0
-
 
     @property
     def all_full(self) -> bool:
-
-        for y in range(len(self.board)):
-            for x in range(len(self.board[y])):
-                if self.board[y][x] == 0:
+        """Return True if every cell on the board is claimed."""
+        for row in self.board:
+            for cell in row:
+                if cell == 0:
                     return False
         return True
 
     @property
     def is_draw(self) -> bool:
-
+        """Return True if the board is full and there are no winners."""
         if self.all_full:
             if len(self.who_won()) > 0:
                 return False
