@@ -3,6 +3,7 @@ import time
 import random
 import sys
 import numpy as np
+from collections import deque
 
 from frame import Frame
 from term_utils import *
@@ -16,6 +17,7 @@ class Screen:
         Initializes the Screen.
         :param last_pos: Initial cursor position (y, x).
         """
+        init_terminal()
         self.last_pos = last_pos
         self.width, self.height = os.get_terminal_size()
         
@@ -82,11 +84,12 @@ class Screen:
 
     def __out(self, text: str, end: str = "\n"):
         """
-        Writes text to stdout.
+        Writes text to stdout and flushes.
         :param text: The text to write.
         :param end: The string to append at the end (default is newline).
         """
         sys.stdout.write(text + end)
+        sys.stdout.flush()
 
     def refresh(self):
         """
@@ -106,13 +109,13 @@ class Screen:
                       build_pixel(self.f1.pixels[vy*2*self.width + x], 
                                   self.f1.pixels[(vy*2+1)*self.width + x]) + "\n"
                       for vy in range(self.height) for x in range(self.width)]
-            self.__out("".join(output), end="")
+            self.__out("".join(output) + "\033[0m", end="")
         else:
             # Partial refresh
             output = []
             for (x, vy), (top, bottom) in changes.items():
                 output.append(generate_move_string(x, vy) + build_pixel(top, bottom))
-            self.__out("".join(output), end="")
+            self.__out("".join(output) + "\033[0m", end="")
 
         self.p1 = self.f1
         self.f1 = Frame(self.width, self.height * 2)
@@ -295,6 +298,62 @@ class ImageSurface:
                 self.pixels[img_offset : img_offset + copy_width]
 
 
+    def move(self, x_pos: int, y_pos: int):
+        self.x += x_pos
+        self.y += y_pos
+
+class Video:
+    """
+    Manages a queue of image frames and renders them sequentially using ImageSurface.
+    """
+    def __init__(self, x: int, y: int, width: int, height: int):
+        """
+        Initializes the Video object.
+        :param x: Initial X-coordinate.
+        :param y: Initial Y-coordinate.
+        :param width: Target width for all frames.
+        :param height: Target height for all frames.
+        """
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.queue = deque()
+        self.cursor = 0
+
+    def input(self, img: np.ndarray):
+        """
+        Adds a new frame to the video queue.
+        :param img: A numpy array representing the image frame.
+        """
+        # Pre-process the image into an ImageSurface for efficient rendering.
+        # This handles resizing once upon input.
+        surface = ImageSurface(self.x, self.y, self.width, self.height, img)
+        self.queue.append(surface)
+
+    def draw(self, t_screen: Screen):
+        """
+        Renders the next frame from the queue and advances the cursor.
+        :param t_screen: The Screen object to draw on.
+        """
+        if not self.queue:
+            return
+
+        # Get the next frame (FIFO)
+        surface = self.queue.popleft()
+
+        # Ensure it's drawn at the Video's current coordinates
+        surface.x = self.x
+        surface.y = self.y
+
+        surface.draw(t_screen)
+        self.cursor += 1
+
+    def reset(self):
+        """
+        Resets the frame cursor.
+        """
+        self.cursor = 0
 
 def load_img(img_path: str):
     img_arr = cv2.imread(img_path)
@@ -308,14 +367,25 @@ if __name__ == "__main__":
     clear()
     screen = Screen()
     img_arr = load_img("test_files/test.jpg")
-    image_surface = ImageSurface(0, 0, 100, 100, img_arr)
+
+    IMG_SIZE = 25
+
+    image_surface = ImageSurface(0, 0, IMG_SIZE, IMG_SIZE, img_arr)
 
     try:
         while True:
+            image_surface.move(1, 0)
             image_surface.draw(screen)
             screen.refresh()
             screen.move_to_bottom()
-            time.sleep(1)
+
+            if image_surface.x > screen.width:
+                image_surface.x = 0
+                image_surface.y += IMG_SIZE
+
+            if image_surface.y + IMG_SIZE > screen.height * 2:
+                image_surface.y = 0
+                image_surface.x += IMG_SIZE
     except KeyboardInterrupt:
         screen.move_to_bottom()
 

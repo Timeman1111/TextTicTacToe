@@ -1,6 +1,6 @@
 from board import TicTacToe
 from board_render import BoardRenderer
-
+from term_utils import init_terminal
 import os
 
 
@@ -120,6 +120,7 @@ def clear():
     print("\033[2J", end="")
 
 def run_game():
+    init_terminal()
     clear()
     game = ToeGame()
     game.play()
