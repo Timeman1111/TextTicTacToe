@@ -1,6 +1,6 @@
 
 from functools import lru_cache
-
+import random
 TOP_HALF_BLOCK = "▀"
 
 def clear():
@@ -23,10 +23,11 @@ def generate_fore_color(color: tuple[int, int, int]):
 def generate_back_color(color: tuple[int, int, int]):
     return f"\033[48;2;{color[0]};{color[1]};{color[2]}m"
 
+@lru_cache(maxsize=16384)
 def build_pixel(top_color: tuple[int, int, int] = (0, 0, 0), bottom_color: tuple[int, int, int] = (0, 0, 0)):
-    tp = generate_fore_color(top_color)
-    bt = generate_back_color(bottom_color)
+    tp = f"\033[38;2;{top_color[0]};{top_color[1]};{top_color[2]}m"
+    bt = f"\033[48;2;{bottom_color[0]};{bottom_color[1]};{bottom_color[2]}m"
+    return tp + bt + TOP_HALF_BLOCK + "\033[0m"
 
-    px = tp + bt + TOP_HALF_BLOCK + "\033[0m"
-    return px
-
+def random_color():
+    return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
